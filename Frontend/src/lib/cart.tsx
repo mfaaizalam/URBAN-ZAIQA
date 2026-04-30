@@ -18,10 +18,19 @@ type CartContextType = {
   open: boolean;
   setOpen: (v: boolean) => void;
   sendOrder: () => void;
+  canCheckout: boolean;
 };
 
 const CartContext = createContext<CartContextType | null>(null);
 const STORAGE_KEY = "uz_cart_v1";
+
+// Determine minimum quantity based on price unit
+export function getMinQty(price: string): { min: number; label: string } {
+  const p = price.toLowerCase();
+  if (p.includes("/dozen")) return { min: 5, label: "Min. 5 dozens required" };
+  if (p.includes("/kg"))    return { min: 2, label: "Min. 2 kg required" };
+  return                           { min: 5, label: "Min. 5 pieces required" };
+}
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -61,29 +70,34 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const setQty = (id: string, qty: number) =>
     setItems((p) =>
-      qty <= 0 ? p.filter((i) => i.id !== id) : p.map((i) => (i.id === id ? { ...i, qty } : i)),
+      qty <= 0
+        ? p.filter((i) => i.id !== id)
+        : p.map((i) => (i.id === id ? { ...i, qty } : i)),
     );
 
   const clear = () => setItems([]);
 
+  // Every item must individually meet its minimum quantity
+  const canCheckout =
+    items.length > 0 &&
+    items.every((i) => i.qty >= getMinQty(i.price).min);
+
   const sendOrder = () => {
-    if (items.length === 0) return;
+    if (!canCheckout) return;
     const msg = buildOrderMessage(items);
     const url = `https://wa.me/923323336821?text=${encodeURIComponent(msg)}`;
-
-    // Clear localStorage FIRST before opening WhatsApp
-    // This ensures cart is empty when user comes back and page reloads
     localStorage.removeItem(STORAGE_KEY);
     setItems([]);
     setOpen(false);
-
     window.open(url, "_blank");
   };
 
   const count = items.reduce((s, i) => s + i.qty, 0);
 
   return (
-    <CartContext.Provider value={{ items, count, add, remove, setQty, clear, open, setOpen, sendOrder }}>
+    <CartContext.Provider
+      value={{ items, count, add, remove, setQty, clear, open, setOpen, sendOrder, canCheckout }}
+    >
       {children}
     </CartContext.Provider>
   );
