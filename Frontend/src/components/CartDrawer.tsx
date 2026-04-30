@@ -1,9 +1,9 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Minus, Plus, Trash2, MessageCircle, ShoppingBag } from "lucide-react";
-import { useCart } from "@/lib/cart";
+import { X, Minus, Plus, Trash2, MessageCircle, ShoppingBag, AlertCircle } from "lucide-react";
+import { useCart, getMinQty } from "@/lib/cart";
 
 export function CartDrawer() {
-  const { items, open, setOpen, setQty, remove, clear, count, sendOrder } = useCart();
+  const { items, open, setOpen, setQty, remove, clear, count, sendOrder, canCheckout } = useCart();
 
   return (
     <AnimatePresence>
@@ -56,54 +56,74 @@ export function CartDrawer() {
               ) : (
                 <ul className="space-y-3">
                   <AnimatePresence initial={false}>
-                    {items.map((it) => (
-                      <motion.li
-                        key={it.id}
-                        layout
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, x: 30, transition: { duration: 0.2 } }}
-                        className="rounded-2xl border border-saffron/30 bg-background p-4"
-                      >
-                        <div className="flex justify-between gap-3">
-                          <div className="min-w-0">
-                            <div className="text-[10px] tracking-[0.25em] uppercase text-secondary font-semibold">
-                              {it.category}
+                    {items.map((it) => {
+                      const { min, label } = getMinQty(it.price);
+                      const belowMin = it.qty < min;
+
+                      return (
+                        <motion.li
+                          key={it.id}
+                          layout
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, x: 30, transition: { duration: 0.2 } }}
+                          className={`rounded-2xl border bg-background p-4 transition-colors ${
+                            belowMin ? "border-amber-400/60" : "border-saffron/30"
+                          }`}
+                        >
+                          <div className="flex justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="text-[10px] tracking-[0.25em] uppercase text-secondary font-semibold">
+                                {it.category}
+                              </div>
+                              <div className="font-display text-lg text-primary font-semibold truncate">
+                                {it.name}
+                              </div>
+                              <div className="text-sm text-muted-foreground mt-0.5">{it.price}</div>
                             </div>
-                            <div className="font-display text-lg text-primary font-semibold truncate">
-                              {it.name}
-                            </div>
-                            <div className="text-sm text-muted-foreground mt-0.5">{it.price}</div>
-                          </div>
-                          <button
-                            onClick={() => remove(it.id)}
-                            aria-label="Remove"
-                            className="h-8 w-8 rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive flex items-center justify-center transition shrink-0"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                        <div className="mt-3 flex items-center justify-between">
-                          <div className="inline-flex items-center rounded-full border border-saffron/40 bg-card overflow-hidden">
                             <button
-                              onClick={() => setQty(it.id, it.qty - 1)}
-                              aria-label="Decrease"
-                              className="h-9 w-9 flex items-center justify-center hover:bg-saffron/10 transition"
+                              onClick={() => remove(it.id)}
+                              aria-label="Remove"
+                              className="h-8 w-8 rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive flex items-center justify-center transition shrink-0"
                             >
-                              <Minus className="h-4 w-4" />
-                            </button>
-                            <span className="w-10 text-center font-semibold tabular-nums">{it.qty}</span>
-                            <button
-                              onClick={() => setQty(it.id, it.qty + 1)}
-                              aria-label="Increase"
-                              className="h-9 w-9 flex items-center justify-center hover:bg-saffron/10 transition"
-                            >
-                              <Plus className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4" />
                             </button>
                           </div>
-                        </div>
-                      </motion.li>
-                    ))}
+
+                          <div className="mt-3 flex items-center justify-between gap-3">
+                            <div className="inline-flex items-center rounded-full border border-saffron/40 bg-card overflow-hidden">
+                              <button
+                                onClick={() => setQty(it.id, it.qty - 1)}
+                                aria-label="Decrease"
+                                className="h-9 w-9 flex items-center justify-center hover:bg-saffron/10 transition"
+                              >
+                                <Minus className="h-4 w-4" />
+                              </button>
+                              <span className="w-10 text-center font-semibold tabular-nums">{it.qty}</span>
+                              <button
+                                onClick={() => setQty(it.id, it.qty + 1)}
+                                aria-label="Increase"
+                                className="h-9 w-9 flex items-center justify-center hover:bg-saffron/10 transition"
+                              >
+                                <Plus className="h-4 w-4" />
+                              </button>
+                            </div>
+
+                            {/* Per-item minimum warning */}
+                            {belowMin && (
+                              <motion.div
+                                initial={{ opacity: 0, x: 6 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="flex items-center gap-1.5 text-amber-500"
+                              >
+                                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                                <span className="text-[11px] font-medium leading-tight">{label}</span>
+                              </motion.div>
+                            )}
+                          </div>
+                        </motion.li>
+                      );
+                    })}
                   </AnimatePresence>
                 </ul>
               )}
@@ -118,17 +138,26 @@ export function CartDrawer() {
                   Clear cart
                 </button>
               )}
+
               <button
                 onClick={sendOrder}
-                disabled={items.length === 0}
+                disabled={!canCheckout}
                 className="group w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-gradient-to-r from-[oklch(0.55_0.18_145)] to-[oklch(0.42_0.16_145)] text-white font-semibold shadow-luxe hover:scale-[1.02] transition disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
                 <MessageCircle className="h-5 w-5" fill="currentColor" />
                 Send Order on WhatsApp
               </button>
-              <p className="text-[11px] text-center text-muted-foreground">
-                Opens WhatsApp with your full order pre-filled.
-              </p>
+
+              {/* Global reminder when button is disabled */}
+              {items.length > 0 && !canCheckout ? (
+                <p className="text-[11px] text-center text-amber-500 font-medium">
+                  Meet the minimum quantity for each item above to place your order.
+                </p>
+              ) : (
+                <p className="text-[11px] text-center text-muted-foreground">
+                  Opens WhatsApp with your full order pre-filled.
+                </p>
+              )}
             </footer>
           </motion.aside>
         </>
