@@ -47,25 +47,6 @@ function Hero() {
         <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-center">
           {/* LEFT — copy */}
           <div className="lg:col-span-7">
-            {/* Logo + eyebrow */}
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="flex items-center gap-3"
-            >
-              <div className="h-14 w-14 rounded-full bg-cream flex items-center justify-center ring-1 ring-saffron/40 shadow-soft overflow-hidden">
-                <img src={logoUz} alt="Urban Zaiqa logo" className="h-12 w-12 object-contain" />
-              </div>
-              <div className="leading-tight">
-                <div className="text-[10px] tracking-[0.4em] uppercase text-saffron/90 font-semibold">
-                  Est. Karachi
-                </div>
-                <div className="text-cream/80 text-sm font-medium">
-                  Pakistani Restaurant & Catering
-                </div>
-              </div>
-            </motion.div>
 
             {/* Headline */}
             <motion.h1
