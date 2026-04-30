@@ -1,12 +1,9 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Minus, Plus, Trash2, MessageCircle, ShoppingBag } from "lucide-react";
-import { buildOrderMessage, useCart } from "@/lib/cart";
-import { waLink } from "@/lib/data";
+import { useCart } from "@/lib/cart";
 
 export function CartDrawer() {
-  const { items, open, setOpen, setQty, remove, clear, count } = useCart();
-
-  const checkoutHref = items.length > 0 ? waLink(buildOrderMessage(items)) : "#";
+  const { items, open, setOpen, setQty, remove, clear, count, sendOrder } = useCart();
 
   return (
     <AnimatePresence>
@@ -121,25 +118,14 @@ export function CartDrawer() {
                   Clear cart
                 </button>
               )}
-              {items.length > 0 ? (
-                <a
-                  href={checkoutHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-gradient-to-r from-[oklch(0.55_0.18_145)] to-[oklch(0.42_0.16_145)] text-white font-semibold shadow-luxe hover:scale-[1.02] transition"
-                >
-                  <MessageCircle className="h-5 w-5" fill="currentColor" />
-                  Send Order on WhatsApp
-                </a>
-              ) : (
-                <button
-                  disabled
-                  className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-gradient-to-r from-[oklch(0.55_0.18_145)] to-[oklch(0.42_0.16_145)] text-white font-semibold opacity-50 cursor-not-allowed"
-                >
-                  <MessageCircle className="h-5 w-5" fill="currentColor" />
-                  Send Order on WhatsApp
-                </button>
-              )}
+              <button
+                onClick={sendOrder}
+                disabled={items.length === 0}
+                className="group w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-gradient-to-r from-[oklch(0.55_0.18_145)] to-[oklch(0.42_0.16_145)] text-white font-semibold shadow-luxe hover:scale-[1.02] transition disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                <MessageCircle className="h-5 w-5" fill="currentColor" />
+                Send Order on WhatsApp
+              </button>
               <p className="text-[11px] text-center text-muted-foreground">
                 Opens WhatsApp with your full order pre-filled.
               </p>
