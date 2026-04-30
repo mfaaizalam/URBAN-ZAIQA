@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 export type CartItem = {
   id: string;
   name: string;
-  price: string; // display string e.g. "Rs 3500/kg"
+  price: string;
   category: string;
   qty: number;
 };
@@ -17,10 +17,10 @@ type CartContextType = {
   clear: () => void;
   open: boolean;
   setOpen: (v: boolean) => void;
+  sendOrder: () => void;
 };
 
 const CartContext = createContext<CartContextType | null>(null);
-
 const STORAGE_KEY = "uz_cart_v1";
 
 export function CartProvider({ children }: { children: ReactNode }) {
@@ -58,16 +58,32 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const remove = (id: string) => setItems((p) => p.filter((i) => i.id !== id));
+
   const setQty = (id: string, qty: number) =>
     setItems((p) =>
       qty <= 0 ? p.filter((i) => i.id !== id) : p.map((i) => (i.id === id ? { ...i, qty } : i)),
     );
+
   const clear = () => setItems([]);
+
+  const sendOrder = () => {
+    if (items.length === 0) return;
+    const msg = buildOrderMessage(items);
+    const url = `https://wa.me/923323336821?text=${encodeURIComponent(msg)}`;
+
+    // Clear localStorage FIRST before opening WhatsApp
+    // This ensures cart is empty when user comes back and page reloads
+    localStorage.removeItem(STORAGE_KEY);
+    setItems([]);
+    setOpen(false);
+
+    window.open(url, "_blank");
+  };
 
   const count = items.reduce((s, i) => s + i.qty, 0);
 
   return (
-    <CartContext.Provider value={{ items, count, add, remove, setQty, clear, open, setOpen }}>
+    <CartContext.Provider value={{ items, count, add, remove, setQty, clear, open, setOpen, sendOrder }}>
       {children}
     </CartContext.Provider>
   );
