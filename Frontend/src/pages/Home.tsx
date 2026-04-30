@@ -98,26 +98,8 @@ function Hero() {
               </a>
             </motion.div>
 
-            {/* Trust */}
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.85, duration: 0.8 }}
-              className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-4"
-            >
-              <div className="flex items-center gap-2">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-3.5 w-3.5 fill-saffron text-saffron" />
-                  ))}
-                </div>
-                <span className="text-cream text-sm font-semibold">4.9</span>
-                <span className="text-cream/50 text-xs">· 1.2k reviews</span>
-              </div>
-              <div className="h-6 w-px bg-cream/15 hidden sm:block" />
-              <Stat n="5,000+" label="Events catered" />
-              <Stat n="15+" label="Years" />
-            </motion.div>
+            
+            
           </div>
 
           {/* RIGHT — image */}
