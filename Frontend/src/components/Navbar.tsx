@@ -43,7 +43,7 @@ export function Navbar() {
             <div className="h-11 w-11 rounded-full bg-cream flex items-center justify-center overflow-hidden ring-1 ring-saffron/40 group-hover:ring-saffron transition shrink-0">
               <img src={logo} alt="Urban Zaiqa" className="h-10 w-10 object-contain" />
             </div>
-            <div className="leading-tight hidden sm:block">
+            <div className="leading-tight">
               <div className="font-display text-lg text-cream font-semibold tracking-tight">
                 Urban Zaiqa
               </div>
