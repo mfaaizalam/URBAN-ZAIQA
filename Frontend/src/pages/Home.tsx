@@ -17,7 +17,7 @@ import { packages, waLink } from "@/lib/data";
 
 function HomePage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <Navbar />
       <Hero />
       <FeaturedPackages />
